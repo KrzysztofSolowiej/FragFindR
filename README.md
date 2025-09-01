@@ -1,4 +1,4 @@
-# FragFindR <img src='inst/www/logo.png' align="right" height="150"/>
+# FragFindR <img src='inst/app/www/logo.png' align="right" height="150"/>
 
 *FragFindR* is a shiny app designed to find MS/MS spectra peaks by fragment mass or fragment loss.
 
