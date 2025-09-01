@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'Literata';
+  src: url('fonts/Literata-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.title-font {
+  font-family: 'Literata', sans-serif !important;
+  color: #1091EB;
+  font-size: 42px;
+  font-weight: normal;
+}
+
+.btn-custom {
+  background-color: #1091EB;
+  color: white;
+  font-size: 18px;
+  border-radius: 8px;
+  padding: 10px 20px;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+.btn-custom:hover {
+  background-color: #0a6cb8;
+}

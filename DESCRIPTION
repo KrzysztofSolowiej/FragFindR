@@ -1,0 +1,27 @@
+Package: FragFindR
+Title: Spectral search by fragments
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Krzysztof",
+           family = "Solowiej",
+           role = c("aut", "cre"),
+           email = "krzysztof.solowiej@umb.edu.pl")
+Description: FragFindR is designed to help in metabolomic research. The package offers MS/MS spectral searches based on fragment masses and the difference between the fragment and precursor masses.
+License: MIT
+Imports: 
+    BiocGenerics,
+    ChemmineR,
+    config,
+    DBI,
+    dplyr,
+    DT,
+    duckdb,
+    golem,
+    htmltools,
+    magrittr,
+    plotly,
+    shiny,
+    svglite
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
