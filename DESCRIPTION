@@ -6,7 +6,9 @@ Authors@R:
            family = "Solowiej",
            role = c("aut", "cre"),
            email = "krzysztof.solowiej@umb.edu.pl")
-Description: FragFindR is designed to help in metabolomic research. The package offers MS/MS spectral searches based on fragment masses and the difference between the fragment and precursor masses.
+Description: FragFindR helps with metabolomic research by offering MS/MS
+    spectral searches based on fragment masses and the difference between
+    fragment and precursor masses.
 License: MIT
 Imports: 
     BiocGenerics,
@@ -24,8 +26,8 @@ Imports:
     shiny,
     svglite
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 3.0.0)
+Depends: R (>= 4.1.0)
 Config/testthat/edition: 3
