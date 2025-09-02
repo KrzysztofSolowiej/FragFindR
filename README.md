@@ -15,7 +15,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) {
 
 remotes::install_github("KrzysztofSolowiej/FragFindR", repos = BiocManager::repositories())
 ```
-Lunch the up by typing:
+Lunch the app by typing:
 ```r
 library(FragFindR)
 FragFindR::run_app()
