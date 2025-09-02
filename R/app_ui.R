@@ -34,6 +34,7 @@ app_ui <- function(request) {
 #' @import shiny
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
+
 golem_add_external_resources <- function() {
   add_resource_path(
     "www",
@@ -46,8 +47,20 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "FragFindR"
     ),
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+
+    # Spinner container (initially hidden)
+    tags$div(
+      id = "spinner-container",
+      tags$img(id = "spinner-logo", src = "www/logo.png")
+    ),
+
+    # JavaScript to show/hide spinner
+    tags$script(HTML("
+      Shiny.addCustomMessageHandler('show_spinner', function(show) {
+        var spinner = document.getElementById('spinner-container');
+        spinner.style.display = show ? 'flex' : 'none';
+      });
+    "))
   )
 }

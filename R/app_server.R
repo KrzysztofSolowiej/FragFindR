@@ -7,8 +7,18 @@
 #' @importFrom magrittr %>%
 #'
 
-hmdb_name_map <- readRDS(app_sys("extdata/hmdb_names_smiles_map.rds"))
-hmdb_mass_map <- readRDS(app_sys("extdata/hmdb_mass_map.rds"))
+hmdb_name_path <- system.file("extdata", "hmdb_names_smiles_map.rds", package = "FragFindR")
+hmdb_mass_path <- system.file("extdata", "hmdb_mass_map.rds", package = "FragFindR")
+
+if (hmdb_name_path == "" || !file.exists(hmdb_name_path)) {
+  stop("hmdb_names_smiles_map.rds not found!")
+}
+if (hmdb_mass_path == "" || !file.exists(hmdb_mass_path)) {
+  stop("hmdb_mass_map.rds not found!")
+}
+
+hmdb_name_map <- readRDS(hmdb_name_path)
+hmdb_mass_map <- readRDS(hmdb_mass_path)
 
 app_server <- function(input, output, session) {
 

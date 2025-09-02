@@ -5,8 +5,10 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Store results after search
     results_data <- reactiveVal(NULL)
+
+    # --- cache environment for spectra ---
+    spectra_cache <- new.env(parent = emptyenv())
 
     output$tolerance_ui <- renderUI({
       if (input$tol_type == "Dalton") {
@@ -18,67 +20,49 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
     output$voltage_range_ui <- renderUI({
       if (input$filter_voltage) {
-        sliderInput(
-          ns("voltage_range"),
-          "Collision Energy Voltage Range",
-          min = 0, max = 120, value = c(0, 120), step = 1
-        )
+        sliderInput(ns("voltage_range"), "Collision Energy Voltage Range",
+                    min = 0, max = 120, value = c(0, 120), step = 1)
       }
     })
 
     observeEvent(input$run_search, {
+      session$sendCustomMessage("show_spinner", TRUE)
       output$spectrum_plot <- plotly::renderPlotly(NULL)
       output$selected_structure <- renderUI(NULL)
 
-      tol_value <- input$tolerance
-      if (input$tol_type == "PPM") {
-        tol_value <- (tol_value / 1e6) * input$target_diff
-      }
+      res <- local({
+        tol_value <- input$tolerance
+        if (input$tol_type == "PPM") tol_value <- (tol_value / 1e6) * input$target_diff
 
-      res <- find_peak_diff(
-        con,
-        target_diff = input$target_diff,
-        tolerance = tol_value,
-        polarity = input$polarity,
-        collision_energy_level = if (input$collision_energy_level != "ALL") input$collision_energy_level else NULL,
-        voltage_range = if (isTRUE(input$filter_voltage)) input$voltage_range else NULL,
-        min_rel_intensity = input$min_int
-      )
+        tmp <- find_peak_diff(
+          con,
+          target_diff = input$target_diff,
+          tolerance = tol_value,
+          polarity = input$polarity,
+          collision_energy_level = if (input$collision_energy_level != "ALL") input$collision_energy_level else NULL,
+          voltage_range = if (isTRUE(input$filter_voltage)) input$voltage_range else NULL,
+          min_rel_intensity = input$min_int
+        )
 
-      if (nrow(res) == 0) {
-        results_data(data.frame())  # store empty df
-        output$results_table <- DT::renderDT(data.frame())
-        output$spectrum_plot <- plotly::renderPlotly(NULL)
-        output$selected_structure <- renderUI(NULL)
+        if (nrow(tmp) == 0) {
+          results_data(data.frame())
+          output$results_table <- DT::renderDT(data.frame())
+          return(NULL)
+        }
+
+        tmp$compound_name <- get_compound_name(tmp$hmdb_id, hmdb_name_map)
+        tmp$structure     <- get_compound_smiles(tmp$hmdb_id, hmdb_name_map)
+        tmp
+      })
+      gc()
+
+      if (is.null(res) || nrow(res) == 0) {
+        session$sendCustomMessage("show_spinner", FALSE)
         return()
       }
 
-      # Add compound names & SMILES
-      res$compound_name <- get_compound_name(res$hmdb_id, hmdb_name_map)
-      res$structure <- get_compound_smiles(res$hmdb_id, hmdb_name_map)
-
-      # Convert SMILES → inline SVG
-      res$structure_img <- vapply(
-        seq_len(nrow(res)),
-        function(i) {
-          smi <- res$structure[i]
-          nm  <- res$compound_name[i]
-          if (!is.na(smi) && nzchar(smi)) {
-            tryCatch(
-              smiles_to_img_tag(smi, nm, width = 150, height = 150),
-              error = function(e) ""
-            )
-          } else {
-            ""
-          }
-        },
-        FUN.VALUE = character(1)
-      )
-
       res <- res %>%
-        dplyr::arrange(precursor_type, diff_from_precursor)
-
-      res <- res %>%
+        dplyr::arrange(precursor_type, diff_from_precursor) %>%
         dplyr::select(
           compound_name,
           precursor_type,
@@ -110,23 +94,13 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           `HMDB Id` = hmdb_id,
           `SMILES` = structure,
           `File Name` = file
-        )
-
-      res <- res %>%
-        dplyr::mutate(Index = as.numeric(rownames(res))) %>%
-        dplyr::select(Index, everything())
+        ) %>%
+        dplyr::mutate(Index = dplyr::row_number())
 
       res$`HMDB Id Link` <- paste0(
         "<a href='https://www.hmdb.ca/metabolites/",
-        res$`HMDB Id`,
-        "' target='_blank'>",
-        res$`HMDB Id`,
-        "</a>"
+        res$`HMDB Id`, "' target='_blank'>", res$`HMDB Id`, "</a>"
       )
-
-      res <- res %>%
-        dplyr::arrange(`Precursor Type`, `Compound Name`) %>%
-        dplyr::mutate(Index = dplyr::row_number())
 
       results_data(res)
 
@@ -145,120 +119,77 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           `Collision Energy Voltage`,
           `Fragment Intensity`,
           `Fragment Rel Intensity (%)`
-          )
+        )
 
       output$results_table <- DT::renderDT(
         res,
         escape = FALSE,
         extensions = c("ColReorder"),
-        options = list(
-          scrollX = TRUE,
-          scrollY = "260px",
-          paging = FALSE,
-          dom = "Bfrtip",
-          colReorder = TRUE
-        ),
+        options = list(scrollX = TRUE, scrollY = "260px", paging = FALSE, dom = "Bfrtip", colReorder = TRUE),
         selection = "single",
         rownames = FALSE
       )
+
+      session$sendCustomMessage("show_spinner", FALSE)
+      gc()
     })
 
-    plot_triggers <- reactive({
-      list(
-        rows = input$results_table_rows_selected,
-        labels = input$plot_labels
-      )
-    })
+    plot_triggers <- reactive({ list(rows = input$results_table_rows_selected, labels = input$plot_labels) })
 
-    # When user clicks a row in the table → plot spectrum from DB
     observeEvent(plot_triggers(), {
       idx <- input$results_table_rows_selected
       if (length(idx) == 0) return()
 
       res <- results_data()
       row <- res[idx, ]
-
       precursor_mz <- row$`Precursor m/z`
       frag_mz <- row$`Fragment m/z`
       file_id <- row$`File Name`
       hmdb_id <- stringr::str_extract(file_id, "HMDB\\d+")
       compound_name <- get_compound_name(hmdb_id, hmdb_name_map)
 
-      # Get all peaks for this file from DuckDB
-      peaks <- DBI::dbGetQuery(
-        con,
-        glue::glue("
+      # --- Use cache ---
+      if (exists(file_id, envir = spectra_cache)) {
+        peaks <- get(file_id, envir = spectra_cache)
+      } else {
+        peaks <- DBI::dbGetQuery(con, glue::glue("
           SELECT mz, intensity
           FROM spectra
           WHERE file = '{file_id}'
-        ")
-      )
+        "))
+        assign(file_id, peaks, envir = spectra_cache)
+      }
 
       x_range <- range(peaks$mz, na.rm = TRUE)
       buffer <- 0.02 * diff(x_range)
       x_range <- c(x_range[1] - buffer, x_range[2] + buffer)
 
-      # Build Plotly spectrum
       p <- plotly::plot_ly() %>%
-        plotly::add_segments(
-          data = peaks,
-          x = ~mz, xend = ~mz,
-          y = ~0, yend = ~intensity,
-          line = list(color = "#8F8F8F"),
-          hoverinfo = "text",
-          text = ~paste0(
-            "m/z: ", round(mz, 4),
-            "<br>Intensity: ", round(intensity, 2)
-          )
-        ) %>%
-        # Precursor in red
-        plotly::add_segments(
-          data = peaks %>% dplyr::filter(abs(mz - precursor_mz) < 0.001),
-          x = ~mz, xend = ~mz,
-          y = ~0, yend = ~intensity,
-          line = list(color = "#FF5454", width = 3),
-          hoverinfo = "text",
-          text = ~paste0(
-            "m/z: ", round(mz, 4),
-            "<br>Intensity: ", round(intensity, 2)
-          )
-        ) %>%
-        # Matched fragment in green
-        plotly::add_segments(
-          data = peaks %>% dplyr::filter(abs(mz - frag_mz) < 0.001),
-          x = ~mz, xend = ~mz,
-          y = ~0, yend = ~intensity,
-          line = list(color = "#2761F5", width = 3),
-          hoverinfo = "text",
-          text = ~paste0(
-            "m/z: ", round(mz, 4),
-            "<br>Intensity: ", round(intensity, 2)
-          )
-        ) %>%
-        plotly::layout(
-          title = NULL,
-          #title = paste0("MS/MS Spectrum: ", compound_name, " (", hmdb_id, ")"),
-          xaxis = list(title = "m/z", range = x_range),
-          yaxis = list(title = "Intensity"),
-          showlegend = FALSE
-        )
+        plotly::add_segments(data = peaks, x = ~mz, xend = ~mz, y = ~0, yend = ~intensity,
+                             line = list(color = "#8F8F8F"),
+                             hoverinfo = "text", text = ~paste0("m/z: ", round(mz,4), "<br>Intensity: ", round(intensity,2))) %>%
+        plotly::add_segments(data = peaks %>% dplyr::filter(abs(mz - precursor_mz) < 0.001),
+                             x = ~mz, xend = ~mz, y = ~0, yend = ~intensity,
+                             line = list(color = "#FF5454", width = 3),
+                             hoverinfo = "text",
+                             text = ~paste0("m/z: ", round(mz,4), "<br>Intensity: ", round(intensity,2))) %>%
+        plotly::add_segments(data = peaks %>% dplyr::filter(abs(mz - frag_mz) < 0.001),
+                             x = ~mz, xend = ~mz, y = ~0, yend = ~intensity,
+                             line = list(color = "#2761F5", width = 3),
+                             hoverinfo = "text",
+                             text = ~paste0("m/z: ", round(mz,4), "<br>Intensity: ", round(intensity,2))) %>%
+        plotly::layout(title = NULL,
+                       xaxis = list(title = "m/z", range = x_range),
+                       yaxis = list(title = "Intensity"),
+                       showlegend = FALSE)
 
       if (input$plot_labels == "Always") {
         annotations <- lapply(1:nrow(peaks), function(i) {
-          list(
-            x = peaks$mz[i],
-            y = peaks$intensity[i],
-            text = round(peaks$mz[i], 4),
-            showarrow = FALSE,
-            textangle = -90,
-            xanchor = "center",
-            yanchor = "bottom",
-            font = list(size = 10, color = "black")
-          )
+          list(x = peaks$mz[i], y = peaks$intensity[i], text = round(peaks$mz[i],4),
+               showarrow = FALSE, textangle = -90, xanchor = "center", yanchor = "bottom",
+               font = list(size = 10, color = "black"))
         })
-
-        p <- p %>%
-          plotly::layout(annotations = annotations)
+        p <- p %>% plotly::layout(annotations = annotations)
       }
 
       output$spectrum_plot <- plotly::renderPlotly(p)
@@ -266,20 +197,10 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       smi <- row$`SMILES`
       img_tag <- ""
       if (!is.na(smi) && nzchar(smi)) {
-        img_tag <- tryCatch(
-          smiles_to_img_tag(smi, compound_name, width = 250, height = 250),
-          error = function(e) ""
-        )
+        img_tag <- tryCatch(smiles_to_img_tag(smi, compound_name, width = 250, height = 250), error = function(e) "")
       }
 
-      output$selected_structure <- renderUI({
-        tagList(
-          hr(),
-          HTML(img_tag)
-        )
-      })
-
+      output$selected_structure <- renderUI({ tagList(hr(), HTML(img_tag)) })
     })
-
   })
 }

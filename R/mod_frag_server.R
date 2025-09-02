@@ -28,100 +28,73 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
     # Run search when button clicked
     observeEvent(input$frag_run_search, {
+      session$sendCustomMessage("show_spinner", TRUE)
       output$spectrum_plot <- plotly::renderPlotly(NULL)
       output$selected_structure <- renderUI(NULL)
 
-      # Parse target m/z values to compute ppm if needed
-      frag_vals <- strsplit(input$fragments_mz, ",")[[1]] %>%
-        trimws() %>% as.numeric()
+      # Use local() to isolate temporary variables
+      matches <- local({
+        frag_vals <- strsplit(input$fragments_mz, ",")[[1]] %>% trimws() %>% as.numeric()
+        tol_value <- input$frag_tolerance
+        if (input$frag_tol_type == "PPM") tol_value <- (tol_value / 1e6) * mean(frag_vals, na.rm = TRUE)
 
-      tol_value <- input$frag_tolerance
+        tmp <- if (input$frag_tol_type == "PPM") {
+          find_fragments(
+            con,
+            fragments_mz = input$fragments_mz,
+            tolerance_ppm = input$frag_tolerance,
+            polarity = input$frag_polarity,
+            collision_energy_level = if (input$frag_collision_energy_level != "ALL") input$frag_collision_energy_level else NULL,
+            voltage_range = if (isTRUE(input$frag_filter_voltage)) input$frag_voltage_range else NULL,
+            min_rel_intensity = input$frag_min_int
+          )
+        } else {
+          find_fragments(
+            con,
+            fragments_mz = input$fragments_mz,
+            tolerance_da = input$frag_tolerance,
+            polarity = input$frag_polarity,
+            collision_energy_level = if (input$frag_collision_energy_level != "ALL") input$frag_collision_energy_level else NULL,
+            voltage_range = if (isTRUE(input$frag_filter_voltage)) input$frag_voltage_range else NULL,
+            min_rel_intensity = input$frag_min_int
+          )
+        }
 
-      if (input$frag_tol_type == "PPM") {
-        # Use mean of fragment m/z values for conversion
-        tol_value <- (tol_value / 1e6) * mean(frag_vals, na.rm = TRUE)
-      }
+        tmp
+      })
+      gc()  # clean memory
 
-      matches <- if (input$frag_tol_type == "PPM") {
-        find_fragments(con,
-                       fragments_mz = input$fragments_mz,
-                       tolerance_ppm = input$frag_tolerance,
-                       polarity = input$frag_polarity,
-                       collision_energy_level = if (input$frag_collision_energy_level != "ALL") input$frag_collision_energy_level else NULL,
-                       voltage_range = if (isTRUE(input$frag_filter_voltage)) input$frag_voltage_range else NULL,
-                       min_rel_intensity = input$frag_min_int)
-      } else {
-        find_fragments(con,
-                       fragments_mz = input$fragments_mz,
-                       tolerance_da = input$frag_tolerance,
-                       polarity = input$frag_polarity,
-                       collision_energy_level = if (input$frag_collision_energy_level != "ALL") input$frag_collision_energy_level else NULL,
-                       voltage_range = if (isTRUE(input$frag_filter_voltage)) input$frag_voltage_range else NULL,
-                       min_rel_intensity = input$frag_min_int)
-      }
-
-      if (nrow(matches) == 0) {
-        results_data(data.frame())  # store empty df
-        output$matches_table <- DT::renderDT(data.frame())
-        output$spectrum_plot <- plotly::renderPlotly(NULL)
-        output$selected_structure <- renderUI(NULL)
+      # --- Short-circuit if no matches ---
+      if (is.null(matches) || nrow(matches) == 0) {
+        empty_df <- data.frame()  # safe placeholder
+        results_data(empty_df)
+        output$matches_table <- DT::renderDT(empty_df)
+        session$sendCustomMessage("show_spinner", FALSE)
         return()
       }
 
-      # matches$compound_name <- get_compound_name(matches$hmdb_id, hmdb_name_map)
-      # matches$structure <- get_compound_smiles(matches$hmdb_id, hmdb_name_map)
-      # matches$structure_img <- vapply(
-      #   seq_len(nrow(matches)),
-      #   function(i) {
-      #     smi <- matches$structure[i]
-      #     nm  <- matches$compound_name[i]
-      #     if (!is.na(smi) && nzchar(smi)) {
-      #       tryCatch(
-      #         smiles_to_img_tag(smi, nm, width = 150, height = 150),
-      #         error = function(e) ""
-      #       )
-      #     } else {
-      #       ""
-      #     }
-      #   },
-      #   FUN.VALUE = character(1)
-      # )
-
+      # Safe to proceed: matches exist
       matches$compound_name <- get_compound_name(matches$hmdb_id, hmdb_name_map)
-      matches$structure <- get_compound_smiles(matches$hmdb_id, hmdb_name_map)
+      matches$structure     <- get_compound_smiles(matches$hmdb_id, hmdb_name_map)
 
-      matches$structure_img <- vapply(
-        seq_len(nrow(matches)),
-        function(i) {
-          smi <- matches$structure[i]
-          nm  <- matches$compound_name[i]
-          if (!is.na(smi) && nzchar(smi)) {
-            tryCatch(smiles_to_img_tag(smi, nm, width = 150, height = 150), error = function(e) "")
-          } else ""
-        },
-        FUN.VALUE = character(1)
-      )
-
-      #hmdb_mass_map <- readRDS("inst/extdata/hmdb_mass_map.rds")
-      matches <- matches %>%
-        dplyr::left_join(hmdb_mass_map %>%
-                  dplyr::select(database_id, adduct_mass),
-                  by = c("hmdb_id" = "database_id"))
+      matches$structure_img <- vapply(seq_len(nrow(matches)), function(i) {
+        smi <- matches$structure[i]
+        nm  <- matches$compound_name[i]
+        if (!is.na(smi) && nzchar(smi)) {
+          tryCatch(smiles_to_img_tag(smi, nm, width = 150, height = 150), error = function(e) "")
+        } else ""
+      }, FUN.VALUE = character(1))
 
       matches <- matches %>%
+        dplyr::left_join(
+          hmdb_mass_map %>% dplyr::select(database_id, adduct_mass),
+          by = c("hmdb_id" = "database_id")
+        ) %>%
         dplyr::select(
-          compound_name,
-          match_count,
-          hmdb_id,
-          polarity,
-          adduct_mass,
-          analyzer_type,
-          ionization_type,
-          collision_energy_level,
-          collision_energy_voltage,
-          structure,
-          file
-        )       %>%
+          compound_name, match_count, hmdb_id, polarity, adduct_mass,
+          analyzer_type, ionization_type, collision_energy_level, collision_energy_voltage,
+          structure, file
+        ) %>%
         dplyr::rename(
           `Compound Name` = compound_name,
           `Match Count` = match_count,
@@ -134,11 +107,8 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           `Collision Energy Voltage` = collision_energy_voltage,
           `SMILES` = structure,
           `File Name` = file
-        )
-
-      matches <- matches %>%
-        dplyr::mutate(Index = as.numeric(rownames(matches))) %>%
-        dplyr::select(Index, everything())
+        ) %>%
+        dplyr::mutate(Index = dplyr::row_number())
 
       matches$`HMDB Id Link` <- paste0(
         "<a href='https://www.hmdb.ca/metabolites/",
@@ -148,40 +118,27 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
         "</a>"
       )
 
-      matches <- matches %>%
-        dplyr::arrange(`Compound Name`) %>%
-        dplyr::mutate(Index = dplyr::row_number())
-
       results_data(matches)
 
       matches <- matches %>%
         dplyr::select(
-          Index,
-          `Compound Name`,
-          `HMDB Id Link`,
-          `Polarity`,
-          `Precursor m/z`,
-          `Analyzer Type`,
-          `Ionization Type`,
-          `Collision Energy Level`,
+          Index, `Compound Name`, `HMDB Id Link`, `Polarity`, `Precursor m/z`,
+          `Analyzer Type`, `Ionization Type`, `Collision Energy Level`,
           `Collision Energy Voltage`
-          )
+        )
 
       output$matches_table <- DT::renderDT(
         matches,
         escape = FALSE,
         extensions = c("ColReorder"),
-        options = list(
-          scrollX = TRUE,
-          scrollY = "260px",
-          paging = FALSE,
-          dom = "Bfrtip",
-          colReorder = TRUE
-        ),
+        options = list(scrollX = TRUE, scrollY = "260px", paging = FALSE, dom = "Bfrtip", colReorder = TRUE),
         selection = "single",
         rownames = FALSE
       )
+
+      session$sendCustomMessage("show_spinner", FALSE)
     })
+
 
     frag_plot_triggers <- reactive({
       list(

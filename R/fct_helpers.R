@@ -308,3 +308,4 @@ smiles_to_img_tag <- function(smiles, name, width = 150, height = 150) {
   # Return relative path so Shiny can serve it
   paste0("<img src='www/temp/", file_name, "' width='", width, "' height='", height, "'>")
 }
+
