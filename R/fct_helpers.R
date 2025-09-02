@@ -121,7 +121,7 @@ find_peak_diff <- function(
     collision_energy_level = NULL,
     voltage_range = NULL,
     min_rel_intensity = 5,
-    mass_map = hmdb_mass_map
+    mass_map
 ) {
   # 1. Create temporary table with hmdb_mass_map
   DBI::dbExecute(con, "DROP TABLE IF EXISTS hmdb_mass_map_tmp")

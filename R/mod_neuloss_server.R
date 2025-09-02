@@ -41,7 +41,8 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           polarity = input$polarity,
           collision_energy_level = if (input$collision_energy_level != "ALL") input$collision_energy_level else NULL,
           voltage_range = if (isTRUE(input$filter_voltage)) input$voltage_range else NULL,
-          min_rel_intensity = input$min_int
+          min_rel_intensity = input$min_int,
+          mass_map = hmdb_mass_map
         )
 
         if (nrow(tmp) == 0) {
