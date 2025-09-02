@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='337.50pt' height='337.50pt' viewBox='0 0 337.50 337.50'>
+<g class='svglite'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA='>
+    <rect x='0.00' y='0.00' width='337.50' height='337.50' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA=)'>
+<polyline points='325.00,220.83 280.36,168.75 ' style='stroke-width: 2.25;' />
+<polyline points='280.36,168.75 280.36,64.58 ' style='stroke-width: 2.25;' />
+<polyline points='278.30,160.42 233.66,212.50 ' style='stroke-width: 2.25;' />
+<polyline points='282.42,177.08 237.78,229.17 ' style='stroke-width: 2.25;' />
+<polyline points='235.72,220.83 191.07,168.75 ' style='stroke-width: 2.25;' />
+<polyline points='191.07,168.75 146.43,220.83 ' style='stroke-width: 2.25;' />
+<polyline points='184.88,168.75 184.88,64.58 ' style='stroke-width: 2.25;' />
+<polyline points='197.26,168.75 197.26,64.58 ' style='stroke-width: 2.25;' />
+<polyline points='191.07,64.58 146.43,12.50 ' style='stroke-width: 2.25;' />
+<polyline points='191.07,64.58 235.72,12.50 ' style='stroke-width: 2.25;' />
+<polyline points='146.43,12.50 101.79,64.58 ' style='stroke-width: 2.25;' />
+<polyline points='101.79,64.58 101.79,168.75 ' style='stroke-width: 2.25;' />
+<polyline points='103.85,56.25 59.21,4.17 ' style='stroke-width: 2.25;' />
+<polyline points='99.73,72.92 55.08,20.83 ' style='stroke-width: 2.25;' />
+<polyline points='57.15,12.50 12.50,64.58 ' style='stroke-width: 2.25;' />
+<polyline points='18.69,64.58 18.69,168.75 ' style='stroke-width: 2.25;' />
+<polyline points='6.31,64.58 6.31,168.75 ' style='stroke-width: 2.25;' />
+<polyline points='12.50,168.75 57.15,220.83 ' style='stroke-width: 2.25;' />
+<polyline points='57.15,220.83 57.15,325.00 ' style='stroke-width: 2.25;' />
+<polyline points='55.08,212.50 99.73,160.42 ' style='stroke-width: 2.25;' />
+<polyline points='59.21,229.17 103.85,177.08 ' style='stroke-width: 2.25;' />
+<polyline points='101.79,168.75 146.43,220.83 ' style='stroke-width: 2.25;' />
+<polyline points='152.62,220.83 152.62,325.00 ' style='stroke-width: 2.25;' />
+<polyline points='140.24,220.83 140.24,325.00 ' style='stroke-width: 2.25;' />
+<polyline points='237.78,4.17 282.42,56.25 ' style='stroke-width: 2.25;' />
+<polyline points='233.66,20.83 278.30,72.92 ' style='stroke-width: 2.25;' />
+<circle cx='325.00' cy='220.83' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='146.43' cy='12.50' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='57.15' cy='325.00' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='146.43' cy='325.00' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<text x='325.00' y='225.99' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='21.58px' lengthAdjust='spacingAndGlyphs'>OH</text>
+<text x='146.43' y='17.66' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='11.19px' lengthAdjust='spacingAndGlyphs'>O</text>
+<text x='57.15' y='330.16' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='21.58px' lengthAdjust='spacingAndGlyphs'>OH</text>
+<text x='146.43' y='330.16' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='11.19px' lengthAdjust='spacingAndGlyphs'>O</text>
+</g>
+</g>
+</svg>
