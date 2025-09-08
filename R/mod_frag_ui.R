@@ -22,7 +22,7 @@ mod_frag_sidebar <- function(id) {
     textInput(
       ns("fragments_mz"),
       "Fragment M/Z (separated by comma)",
-      value = "99.9"
+      value = "184.07"
     ),
     #selectInput(ns("frag_polarity"), "Polarity", choices = c("Positive", "Negative")),
     radioButtons(

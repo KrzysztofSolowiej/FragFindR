@@ -2,6 +2,5 @@
 .Rbuildignore
 .Rhistory
 FragFindR.Rproj
-#inst/app/www/temp/
 data-raw/hmdb_spectra.duckdb
 rsconnect/

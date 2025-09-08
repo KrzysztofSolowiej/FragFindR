@@ -8,9 +8,17 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
     # Store results after search
     results_data <- reactiveVal(NULL)
 
+    # output$frag_tolerance_ui <- renderUI({
+    #   if (input$frag_tol_type == "Dalton") {
+    #     numericInput(ns("frag_tolerance"), "Tolerance (Da)", value = 0.01, step = 0.001)
+    #   } else {
+    #     numericInput(ns("frag_tolerance"), "Tolerance (PPM)", value = 10, step = 1)
+    #   }
+    # })
+
     output$frag_tolerance_ui <- renderUI({
       if (input$frag_tol_type == "Dalton") {
-        numericInput(ns("frag_tolerance"), "Tolerance (Da)", value = 0.01, step = 0.001)
+        textInput(ns("frag_tolerance"), "Tolerance (Da)", value = "0.01")
       } else {
         numericInput(ns("frag_tolerance"), "Tolerance (PPM)", value = 10, step = 1)
       }
@@ -35,7 +43,13 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       # Use local() to isolate temporary variables
       matches <- local({
         frag_vals <- strsplit(input$fragments_mz, ",")[[1]] %>% trimws() %>% as.numeric()
-        tol_value <- input$frag_tolerance
+
+        if (input$frag_tol_type == "Dalton") {
+          tol_value <- as.numeric(gsub(",", ".", input$frag_tolerance))
+        } else {
+          tol_value <- input$frag_tolerance
+        }
+
         if (input$frag_tol_type == "PPM") tol_value <- (tol_value / 1e6) * mean(frag_vals, na.rm = TRUE)
 
         tmp <- if (input$frag_tol_type == "PPM") {
@@ -125,7 +139,8 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           Index, `Compound Name`, `HMDB Id Link`, `Polarity`, `Precursor m/z`,
           `Analyzer Type`, `Ionization Type`, `Collision Energy Level`,
           `Collision Energy Voltage`
-        )
+        ) %>%
+        dplyr::mutate(`Precursor m/z` = round(`Precursor m/z`, 4))
 
       output$matches_table <- DT::renderDT(
         matches,
@@ -201,7 +216,7 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
         if (identical(input$frag_tol_type, "PPM")) {
           (input$frag_tolerance / 1e6) * mz0
         } else {
-          input$frag_tolerance
+          as.numeric(gsub(",", ".", input$frag_tolerance))
         }
       }
 
@@ -253,8 +268,9 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       output$spectrum_plot <- plotly::renderPlotly(p)
 
       smi <- row$`SMILES`
+
       img_tag <- if (!is.na(smi) && nzchar(smi)) {
-        tryCatch(smiles_to_img_tag(smi, compound_name, width = 250, height = 250), error = function(e) "")
+        tryCatch(smiles_to_img_tag(smi, hmdb_id, width = 250, height = 250), error = function(e) "")
       } else ""
       output$selected_structure <- renderUI({ tagList(hr(), HTML(img_tag)) })
     })

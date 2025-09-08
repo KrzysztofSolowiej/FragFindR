@@ -12,7 +12,7 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
     output$tolerance_ui <- renderUI({
       if (input$tol_type == "Dalton") {
-        numericInput(ns("tolerance"), "Tolerance (Da)", value = 0.01, step = 0.001)
+        textInput(ns("tolerance"), "Tolerance (Da)", value = "0.01")
       } else {
         numericInput(ns("tolerance"), "Tolerance (PPM)", value = 10, step = 1)
       }
@@ -31,12 +31,17 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       output$selected_structure <- renderUI(NULL)
 
       res <- local({
-        tol_value <- input$tolerance
-        if (input$tol_type == "PPM") tol_value <- (tol_value / 1e6) * input$target_diff
+        if (input$tol_type == "Dalton") {
+          tol_value <- as.numeric(gsub(",", ".", input$tolerance))
+        } else {
+          tol_value <- input$tolerance
+        }
+
+        if (input$tol_type == "PPM") tol_value <- (tol_value / 1e6) * as.numeric(input$target_diff)
 
         tmp <- find_peak_diff(
           con,
-          target_diff = input$target_diff,
+          target_diff = as.numeric(input$target_diff),
           tolerance = tol_value,
           polarity = input$polarity,
           collision_energy_level = if (input$collision_energy_level != "ALL") input$collision_energy_level else NULL,
@@ -96,7 +101,10 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           `SMILES` = structure,
           `File Name` = file
         ) %>%
-        dplyr::mutate(Index = dplyr::row_number())
+        dplyr::mutate(Index = dplyr::row_number())  %>%
+        dplyr::mutate(`Difference from Precursor` = round(`Difference from Precursor`, 4)) %>%
+        dplyr::mutate(`Precursor m/z` = round(`Precursor m/z`, 4)) %>%
+        dplyr::mutate(`Fragment m/z` = round(`Fragment m/z`, 4))
 
       res$`HMDB Id Link` <- paste0(
         "<a href='https://www.hmdb.ca/metabolites/",
@@ -198,9 +206,8 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       smi <- row$`SMILES`
       img_tag <- ""
       if (!is.na(smi) && nzchar(smi)) {
-        img_tag <- tryCatch(smiles_to_img_tag(smi, compound_name, width = 250, height = 250), error = function(e) "")
+        img_tag <- tryCatch(smiles_to_img_tag(smi, hmdb_id, width = 250, height = 250), error = function(e) "")
       }
-
       output$selected_structure <- renderUI({ tagList(hr(), HTML(img_tag)) })
     })
   })

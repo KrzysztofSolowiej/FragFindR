@@ -28,8 +28,12 @@ mod_neuloss_sidebar <- function(id) {
   ns <- NS(id)
 
   tagList(
-    numericInput(ns("target_diff"), "Target Difference", value = 123.05, step = 0.01),
-    #selectInput(ns("polarity"), "Polarity", choices = c("Positive", "Negative")),
+    #numericInput(ns("target_diff"), "Target Difference", value = 123.05, step = 0.01),
+    textInput(
+      ns("target_diff"),
+      "Target Difference",
+      value = "123.05"
+    ),
     radioButtons(
       ns("polarity"),
       "Polarity",

@@ -285,27 +285,11 @@ smiles_to_svg <- function(smiles, width = 300, height = 300) {
 }
 
 smiles_to_img_tag <- function(smiles, name, width = 150, height = 150) {
-  # Directory inside www
-  temp_dir <- file.path(app_sys("app/www/temp"))
+  temp_dir <- file.path(app_sys("app/www/img"))
   if (!dir.exists(temp_dir)) dir.create(temp_dir, recursive = TRUE)
 
-  # Safe filename
-  file_name <- paste0(gsub("[^A-Za-z0-9]", "_", name), ".svg")
+  file_name <- paste0(name, ".svg")
   file_path <- file.path(temp_dir, file_name)
 
-  # Generate image if missing
-  if (!file.exists(file_path)) {
-    molset <- ChemmineR::smiles2sdf(smiles)
-    if (length(molset) == 0) return("")
-    mol <- molset[[1]]
-
-    svglite::svglite(file_path, width = width / 40, height = height / 40)
-    par(mar = c(3, 3, 3, 3))
-    ChemmineR::plot(mol)
-    dev.off()
-  }
-
-  # Return relative path so Shiny can serve it
-  paste0("<img src='www/temp/", file_name, "' width='", width, "' height='", height, "'>")
+  paste0("<img src='www/img/", file_name, "' width='", width, "' height='", height, "'>")
 }
-

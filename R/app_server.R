@@ -5,7 +5,6 @@
 #' @import shiny
 #' @noRd
 #' @importFrom magrittr %>%
-#'
 app_server <- function(input, output, session) {
 
   hmdb_name_path <- system.file("extdata", "hmdb_names_smiles_map.rds", package = "FragFindR")

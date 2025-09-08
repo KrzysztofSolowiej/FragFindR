@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='337.50pt' height='337.50pt' viewBox='0 0 337.50 337.50'>
+<g class='svglite'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA='>
+    <rect x='0.00' y='0.00' width='337.50' height='337.50' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA=)'>
+<polyline points='280.36,325.00 280.36,116.67 ' style='stroke-width: 2.25;' />
+<polyline points='280.36,116.67 325.00,12.50 ' style='stroke-width: 2.25;' />
+<polyline points='282.42,100.00 237.77,-4.17 ' style='stroke-width: 2.25;' />
+<polyline points='278.30,133.33 233.65,29.17 ' style='stroke-width: 2.25;' />
+<polyline points='235.71,12.50 191.07,116.67 ' style='stroke-width: 2.25;' />
+<polyline points='191.07,116.67 146.43,12.50 ' style='stroke-width: 2.25;' />
+<polyline points='146.43,12.50 101.79,116.67 ' style='stroke-width: 2.25;' />
+<polyline points='101.79,116.67 76.01,297.08 ' style='stroke-width: 2.25;' />
+<polyline points='101.79,116.67 127.56,297.08 ' style='stroke-width: 2.25;' />
+<polyline points='101.79,116.67 57.14,12.50 ' style='stroke-width: 2.25;' />
+<polyline points='55.08,-4.17 10.44,100.00 ' style='stroke-width: 2.25;' />
+<polyline points='59.20,29.17 14.56,133.33 ' style='stroke-width: 2.25;' />
+<circle cx='127.56' cy='297.08' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<text x='127.56' y='302.24' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='21.58px' lengthAdjust='spacingAndGlyphs'>OH</text>
+</g>
+</g>
+</svg>

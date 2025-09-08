@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='337.50pt' height='337.50pt' viewBox='0 0 337.50 337.50'>
+<g class='svglite'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA='>
+    <rect x='0.00' y='0.00' width='337.50' height='337.50' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHwzMzcuNTB8MC4wMHwzMzcuNTA=)'>
+<polyline points='221.29,63.69 221.29,145.66 ' style='stroke-width: 2.25;' />
+<polyline points='221.29,63.69 262.07,63.69 ' style='stroke-width: 2.25;' />
+<polyline points='221.29,63.69 180.52,63.69 ' style='stroke-width: 2.25;' />
+<polyline points='180.52,63.69 160.12,105.30 ' style='stroke-width: 2.25;' />
+<polyline points='160.12,105.30 180.52,145.66 ' style='stroke-width: 2.25;' />
+<polyline points='180.52,145.66 160.48,186.27 ' style='stroke-width: 2.25;' />
+<polyline points='180.52,145.66 221.29,145.66 ' style='stroke-width: 2.25;' />
+<polyline points='160.48,186.27 120.70,193.75 ' style='stroke-width: 2.25;' />
+<polyline points='120.70,193.75 106.38,237.51 ' style='stroke-width: 2.25;' />
+<polyline points='106.38,237.51 66.60,244.99 ' style='stroke-width: 2.25;' />
+<polyline points='66.60,244.99 52.29,288.73 ' style='stroke-width: 2.25;' />
+<polyline points='52.29,288.73 12.50,296.22 ' style='stroke-width: 2.25;' />
+<polyline points='55.17,286.15 80.64,322.42 ' style='stroke-width: 2.25;' />
+<polyline points='49.41,291.32 74.88,327.58 ' style='stroke-width: 2.25;' />
+<polyline points='221.29,145.66 262.07,145.66 ' style='stroke-width: 2.25;' />
+<polyline points='262.07,145.66 282.47,104.05 ' style='stroke-width: 2.25;' />
+<polyline points='282.47,98.13 325.00,98.13 ' style='stroke-width: 2.25;' />
+<polyline points='282.47,109.98 325.00,109.98 ' style='stroke-width: 2.25;' />
+<polyline points='282.47,104.05 262.07,63.69 ' style='stroke-width: 2.25;' />
+<circle cx='160.12' cy='105.30' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='12.50' cy='296.22' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='77.76' cy='325.00' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='262.07' cy='145.66' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='325.00' cy='104.05' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<circle cx='262.07' cy='63.69' r='7.56' style='stroke-width: 0.75; stroke: none; fill: #FFFFFF;' />
+<text x='160.12' y='110.46' text-anchor='middle' style='font-size: 14.40px;fill: #00FF00; font-family: "Arial";' textLength='9.59px' lengthAdjust='spacingAndGlyphs'>S</text>
+<text x='12.50' y='301.38' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='21.58px' lengthAdjust='spacingAndGlyphs'>OH</text>
+<text x='77.76' y='330.16' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='11.19px' lengthAdjust='spacingAndGlyphs'>O</text>
+<text x='262.07' y='150.81' text-anchor='middle' style='font-size: 14.40px;fill: #0000FF; font-family: "Arial";' textLength='20.78px' lengthAdjust='spacingAndGlyphs'>NH</text>
+<text x='325.00' y='109.21' text-anchor='middle' style='font-size: 14.40px;fill: #FF0000; font-family: "Arial";' textLength='11.19px' lengthAdjust='spacingAndGlyphs'>O</text>
+<text x='262.07' y='68.84' text-anchor='middle' style='font-size: 14.40px;fill: #0000FF; font-family: "Arial";' textLength='20.78px' lengthAdjust='spacingAndGlyphs'>NH</text>
+</g>
+</g>
+</svg>
