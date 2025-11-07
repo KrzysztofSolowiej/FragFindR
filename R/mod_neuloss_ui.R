@@ -66,6 +66,7 @@ mod_neuloss_sidebar <- function(id) {
       inline = TRUE
     ),
     actionButton(ns("run_search"), "Run search", class = "btn-custom"),
+    uiOutput(ns("mz_distance_info")),
     uiOutput(ns("selected_structure"))
   )
 }

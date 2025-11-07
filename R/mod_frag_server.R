@@ -7,14 +7,20 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
     # Store results after search
     results_data <- reactiveVal(NULL)
+    selected_mz <- reactiveVal(numeric())
 
-    # output$frag_tolerance_ui <- renderUI({
-    #   if (input$frag_tol_type == "Dalton") {
-    #     numericInput(ns("frag_tolerance"), "Tolerance (Da)", value = 0.01, step = 0.001)
-    #   } else {
-    #     numericInput(ns("frag_tolerance"), "Tolerance (PPM)", value = 10, step = 1)
-    #   }
-    # })
+    observeEvent(plotly::event_data("plotly_click", source = ns("frag_plot")), {
+      click_data <- plotly::event_data("plotly_click", source = ns("frag_plot"))
+      if (is.null(click_data) || is.null(click_data$x)) return()
+
+      mz_clicked <- click_data$x
+      mzs <- selected_mz()
+      if (length(mzs) >= 2) {
+        mzs <- numeric()
+      }
+      mzs <- c(mzs, mz_clicked)
+      selected_mz(mzs)
+    })
 
     output$frag_tolerance_ui <- renderUI({
       if (input$frag_tol_type == "Dalton") {
@@ -154,7 +160,6 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       session$sendCustomMessage("show_spinner", FALSE)
     })
 
-
     frag_plot_triggers <- reactive({
       list(
         rows = input$matches_table_rows_selected,
@@ -178,7 +183,7 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
         return()
       }
 
-      file_id <- row$`File Name`[1]  # enforce single row
+      file_id <- row$`File Name`[1]
       hmdb_id <- stringr::str_extract(file_id, "HMDB\\d+")
       compound_name <- get_compound_name(hmdb_id, hmdb_name_map)
 
@@ -200,7 +205,7 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       buffer <- 0.02 * diff(x_range)
       x_range <- c(x_range[1] - buffer, x_range[2] + buffer)
 
-      p <- plotly::plot_ly() %>%
+      p <- plotly::plot_ly(source = ns("frag_plot")) %>%
         plotly::add_segments(
           data = peaks,
           x = ~mz, xend = ~mz,
@@ -258,9 +263,8 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
       p <- p %>%
         plotly::layout(
-          #title = paste0("MS/MS Spectrum: ", compound_name, " (", hmdb_id, ")"),
           title = NULL,
-          xaxis = list(title = "m/z", range = x_range),  # fix axis range
+          xaxis = list(title = "m/z", range = x_range),
           yaxis = list(title = "Intensity"),
           showlegend = FALSE
         )
@@ -272,7 +276,51 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       img_tag <- if (!is.na(smi) && nzchar(smi)) {
         tryCatch(smiles_to_img_tag(smi, hmdb_id, width = 250, height = 250), error = function(e) "")
       } else ""
-      output$selected_structure <- renderUI({ tagList(hr(), HTML(img_tag)) })
+      output$selected_structure <- renderUI({ tagList(br(), HTML(img_tag)) })
+
+
+      output$mz_distance_info <- renderUI({
+        mzs <- selected_mz()
+        format_mz <- function(x) ifelse(is.null(x), "—", sprintf("%.5f", x))
+        first <- if (length(mzs) >= 1) mzs[1] else NULL
+        second <- if (length(mzs) >= 2) mzs[2] else NULL
+        diff_val <- if (length(mzs) == 2) abs(diff(mzs)) else NULL
+
+        tagList(
+          br(),
+          div(
+            style = "
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: #fafafa;
+        font-size: 13px;
+        line-height: 1.4;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      ",
+            if (length(mzs) == 0) {
+              tags$span("Click peaks to measure Δm/z between two fragments.",
+                        style = "color:#777; font-style:italic;")
+            } else {
+              tagList(
+                tags$div(
+                  tags$b("First m/z: "), format_mz(first)
+                ),
+                tags$div(
+                  tags$b("Second m/z: "), format_mz(second)
+                ),
+                tags$div(
+                  tags$b("Δm/z: "), ifelse(is.null(diff_val), "—", signif(diff_val, 6))
+                )
+              )
+            }
+          )
+        )
+      })
+
     })
 
   })

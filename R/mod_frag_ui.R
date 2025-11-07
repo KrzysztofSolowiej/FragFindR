@@ -24,7 +24,6 @@ mod_frag_sidebar <- function(id) {
       "Fragment M/Z (separated by comma)",
       value = "184.07"
     ),
-    #selectInput(ns("frag_polarity"), "Polarity", choices = c("Positive", "Negative")),
     radioButtons(
       ns("frag_polarity"),
       "Polarity",
@@ -57,6 +56,7 @@ mod_frag_sidebar <- function(id) {
       inline = TRUE
     ),
     actionButton(ns("frag_run_search"), "Run search", class = "btn-custom"),
+    uiOutput(ns("mz_distance_info")),
     uiOutput(ns("selected_structure"))
   )
 }

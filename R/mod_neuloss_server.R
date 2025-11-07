@@ -6,6 +6,22 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
     ns <- session$ns
 
     results_data <- reactiveVal(NULL)
+    selected_mz <- reactiveVal(numeric())
+
+    observeEvent(plotly::event_data("plotly_click", source = ns("loss_plot")), {
+      click_data <- plotly::event_data("plotly_click", source = ns("loss_plot"))
+      if (is.null(click_data) || is.null(click_data$x)) return()
+
+      mz_clicked <- click_data$x
+      mzs <- selected_mz()
+
+      if (length(mzs) >= 2) {
+        mzs <- numeric()
+      }
+
+      mzs <- c(mzs, mz_clicked)
+      selected_mz(mzs)
+    })
 
     # --- cache environment for spectra ---
     spectra_cache <- new.env(parent = emptyenv())
@@ -173,7 +189,7 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       buffer <- 0.02 * diff(x_range)
       x_range <- c(x_range[1] - buffer, x_range[2] + buffer)
 
-      p <- plotly::plot_ly() %>%
+      p <- plotly::plot_ly(source = ns("loss_plot")) %>%
         plotly::add_segments(data = peaks, x = ~mz, xend = ~mz, y = ~0, yend = ~intensity,
                              line = list(color = "#8F8F8F"),
                              hoverinfo = "text", text = ~paste0("m/z: ", round(mz,4), "<br>Intensity: ", round(intensity,2))) %>%
@@ -208,7 +224,51 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       if (!is.na(smi) && nzchar(smi)) {
         img_tag <- tryCatch(smiles_to_img_tag(smi, hmdb_id, width = 250, height = 250), error = function(e) "")
       }
-      output$selected_structure <- renderUI({ tagList(hr(), HTML(img_tag)) })
+      output$selected_structure <- renderUI({ tagList(br(), HTML(img_tag)) })
+
+      output$mz_distance_info <- renderUI({
+        mzs <- selected_mz()
+        format_mz <- function(x) ifelse(is.null(x), "—", sprintf("%.5f", x))
+        first <- if (length(mzs) >= 1) mzs[1] else NULL
+        second <- if (length(mzs) >= 2) mzs[2] else NULL
+        diff_val <- if (length(mzs) == 2) abs(diff(mzs)) else NULL
+
+        tagList(
+          br(),
+          div(
+            style = "
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background-color: #fafafa;
+        font-size: 13px;
+        line-height: 1.4;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      ",
+            if (length(mzs) == 0) {
+              tags$span("Click peaks to measure Δm/z between two fragments.",
+                        style = "color:#777; font-style:italic;")
+            } else {
+              tagList(
+                tags$div(
+                  tags$b("First m/z: "), format_mz(first)
+                ),
+                tags$div(
+                  tags$b("Second m/z: "), format_mz(second)
+                ),
+                tags$div(
+                  tags$b("Δm/z: "), ifelse(is.null(diff_val), "—", signif(diff_val, 6))
+                )
+              )
+            }
+          )
+        )
+      })
+
+
     })
   })
 }
