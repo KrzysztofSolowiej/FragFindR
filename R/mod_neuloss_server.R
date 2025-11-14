@@ -45,6 +45,7 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       session$sendCustomMessage("show_spinner", TRUE)
       output$spectrum_plot <- plotly::renderPlotly(NULL)
       output$selected_structure <- renderUI(NULL)
+      selected_mz(numeric())
 
       res <- local({
         if (input$tol_type == "Dalton") {

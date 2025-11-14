@@ -38,11 +38,13 @@ app_server <- function(input, output, session) {
   # Call modules
   mod_frag_server("frag", con, hmdb_name_map, hmdb_mass_map)
   mod_neuloss_server("neuloss", con, hmdb_name_map, hmdb_mass_map)
+  mod_custom_server("custom")
 
   output$dynamic_sidebar <- renderUI({
     switch(input$main_tabs,
            "Fragment search" = mod_frag_sidebar("frag"),
-           "Neutral loss search" = mod_neuloss_sidebar("neuloss")
+           "Neutral loss search" = mod_neuloss_sidebar("neuloss"),
+           "Custom peaks visualization" = mod_custom_sidebar("custom")
     )
   })
 

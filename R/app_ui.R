@@ -17,7 +17,8 @@ app_ui <- function(request) {
         mainPanel(
           tabsetPanel(id = "main_tabs",
             tabPanel("Fragment search", mod_frag_ui("frag")),
-            tabPanel("Neutral loss search", mod_neuloss_ui("neuloss"))
+            tabPanel("Neutral loss search", mod_neuloss_ui("neuloss")),
+            tabPanel("Custom peaks visualization", mod_custom_ui("custom"))
         )
         )
       )

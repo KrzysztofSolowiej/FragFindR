@@ -45,6 +45,7 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       session$sendCustomMessage("show_spinner", TRUE)
       output$spectrum_plot <- plotly::renderPlotly(NULL)
       output$selected_structure <- renderUI(NULL)
+      selected_mz(numeric())
 
       # Use local() to isolate temporary variables
       matches <- local({
@@ -82,11 +83,11 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
 
         tmp
       })
-      gc()  # clean memory
+      gc()
 
       # --- Short-circuit if no matches ---
       if (is.null(matches) || nrow(matches) == 0) {
-        empty_df <- data.frame()  # safe placeholder
+        empty_df <- data.frame()
         results_data(empty_df)
         output$matches_table <- DT::renderDT(empty_df)
         session$sendCustomMessage("show_spinner", FALSE)
@@ -204,6 +205,9 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       x_range <- range(peaks$mz, na.rm = TRUE)
       buffer <- 0.02 * diff(x_range)
       x_range <- c(x_range[1] - buffer, x_range[2] + buffer)
+
+      print(str(peaks))
+      print(peaks)
 
       p <- plotly::plot_ly(source = ns("frag_plot")) %>%
         plotly::add_segments(
