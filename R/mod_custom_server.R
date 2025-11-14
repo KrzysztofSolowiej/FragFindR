@@ -5,10 +5,8 @@ mod_custom_server <- function(id){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
-    # store selected mz clicks (two values max)
     selected_mz <- reactiveVal(numeric())
 
-    # click handler (listening to plot clicks)
     observeEvent(plotly::event_data("plotly_click", source = ns("custom_plot")), {
       click_data <- plotly::event_data("plotly_click", source = ns("custom_plot"))
       if (is.null(click_data) || is.null(click_data$x)) return()
@@ -21,18 +19,15 @@ mod_custom_server <- function(id){
       selected_mz(c(mzs, mz_clicked))
     })
 
-    # parse data only on button click
     peaks <- eventReactive(input$custom_button, {
       req(input$custom_mz)
 
       txt <- input$custom_mz
-      # defensively remove any trailing/leading whitespace
       txt <- trimws(txt)
       if (nchar(txt) == 0) {
         validate(need(FALSE, "No data provided"))
       }
 
-      # Try reading using read.table which accepts arbitrary whitespace separators
       mat <- tryCatch(
         utils::read.table(text = txt, header = FALSE, stringsAsFactors = FALSE, comment.char = "", blank.lines.skip = TRUE),
         error = function(e) NULL
@@ -42,7 +37,6 @@ mod_custom_server <- function(id){
         need(!is.null(mat) && ncol(mat) >= 2, "Input must contain at least two columns per line (m/z and intensity)")
       )
 
-      # keep first two columns, coerce to numeric
       mz <- as.numeric(mat[[1]])
       intensity <- as.numeric(mat[[2]])
 
@@ -55,12 +49,10 @@ mod_custom_server <- function(id){
       data.frame(mz = mz, intensity = intensity)
     })
 
-    # reactive plot: updates when peaks() changes OR fix_labels toggles
     output$custom_plot <- plotly::renderPlotly({
       req(peaks())
       df <- peaks()
 
-      # auto x-range with small buffer
       x_range <- range(df$mz, na.rm = TRUE)
       buf <- ifelse(diff(x_range) == 0, x_range[1] * 0.01 + 1e-6, 0.05 * diff(x_range))
       x_range <- c(x_range[1] - buf, x_range[2] + buf)
@@ -100,11 +92,9 @@ mod_custom_server <- function(id){
         showlegend = FALSE
       )
 
-      # register click events for this plot (silence warnings and enable event_data)
       plotly::event_register(p, "plotly_click")
     })
 
-    # separate UI output for distance box
     output$custom_distance_info <- renderUI({
       mzs <- selected_mz()
       fmt <- function(x) ifelse(is.null(x), "—", sprintf("%.5f", x))

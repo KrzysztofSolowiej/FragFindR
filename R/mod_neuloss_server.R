@@ -47,6 +47,29 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       output$selected_structure <- renderUI(NULL)
       selected_mz(numeric())
 
+      raw_diff <- input$target_diff
+
+      # Reject values containing commas
+      if (grepl(",", raw_diff)) {
+        showNotification("Please enter only a single numeric value for target difference (no commas).",
+                         type = "error", duration = 5)
+        session$sendCustomMessage("show_spinner", FALSE)
+        return()
+      }
+
+      # Try to convert to numeric
+      diff_val <- suppressWarnings(as.numeric(raw_diff))
+
+      if (is.na(diff_val)) {
+        showNotification("Invalid target difference. Please enter a numeric value, e.g. 18.0106",
+                         type = "error", duration = 5)
+        session$sendCustomMessage("show_spinner", FALSE)
+        return()
+      }
+
+      # If valid, overwrite input so code below keeps working
+      target_diff_num <- diff_val
+
       res <- local({
         if (input$tol_type == "Dalton") {
           tol_value <- as.numeric(gsub(",", ".", input$tolerance))
@@ -54,11 +77,11 @@ mod_neuloss_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
           tol_value <- input$tolerance
         }
 
-        if (input$tol_type == "PPM") tol_value <- (tol_value / 1e6) * as.numeric(input$target_diff)
+        if (input$tol_type == "PPM") tol_value <- (tol_value / 1e6) * target_diff_num
 
         tmp <- find_peak_diff(
           con,
-          target_diff = as.numeric(input$target_diff),
+          target_diff = target_diff_num,
           tolerance = tol_value,
           polarity = input$polarity,
           collision_energy_level = if (input$collision_energy_level != "ALL") input$collision_energy_level else NULL,

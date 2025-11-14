@@ -20,7 +20,7 @@ mod_custom_sidebar <- function(id) {
   tagList(
     textAreaInput(
       ns("custom_mz"),
-      "Please paste your custom data (two columns: m/z intensity)",
+      "Please paste your custom data",
       value = "90.97445 681
 106.94476 274
 110.02750 110

@@ -47,9 +47,49 @@ mod_frag_server <- function(id, con, hmdb_name_map, hmdb_mass_map) {
       output$selected_structure <- renderUI(NULL)
       selected_mz(numeric())
 
+      # ---- VALIDATE AND PARSE FRAGMENT LIST ----
+      raw_frag <- input$fragments_mz
+
+      # Replace decimal commas, but only when they appear inside numbers
+      # (e.g. "120,5" -> "120.5")
+      raw_frag <- gsub("(\\d),(\\d)", "\\1.\\2", raw_frag)
+
+      # Disallow semicolons (Excel sometimes exports with ";")
+      if (grepl(";", raw_frag)) {
+        showNotification(
+          "Semicolons are not supported. Please use commas to separate fragment m/z values.",
+          type = "error", duration = 5
+        )
+        session$sendCustomMessage("show_spinner", FALSE)
+        return()
+      }
+
+      # Now split on commas (fragment separators)
+      frag_parts <- unlist(strsplit(raw_frag, ","))
+
+      # Trim whitespace
+      frag_parts <- trimws(frag_parts)
+
+      # Convert to numeric
+      frag_vals <- suppressWarnings(as.numeric(frag_parts))
+
+      # Check for invalid fragment values
+      if (any(is.na(frag_vals))) {
+        showNotification(
+          "Invalid m/z values detected. Please provide numeric values separated by commas.",
+          type = "error", duration = 5
+        )
+        session$sendCustomMessage("show_spinner", FALSE)
+        return()
+      }
+
+      # Store validated values for use below
+      validated_frag_vals <- frag_vals
+
+
       # Use local() to isolate temporary variables
       matches <- local({
-        frag_vals <- strsplit(input$fragments_mz, ",")[[1]] %>% trimws() %>% as.numeric()
+        frag_vals <- validated_frag_vals
 
         if (input$frag_tol_type == "Dalton") {
           tol_value <- as.numeric(gsub(",", ".", input$frag_tolerance))
